@@ -343,6 +343,12 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
         $editVersionsForJs = $isEdit ? (int) $obj->id : 0;
         $formatBtnLabel = $this->trans('Format CSS', [], 'Modules.Aplinesimpleeditcssjs.Admin');
 
+        // AJAX endpoint for this controller, token included. The action name is
+        // appended by the JS (FormatCss / LoadVersion).
+        $ajaxUrl = $this->context->link->getAdminLink('AdminAplineSimpleEditCssJsSnippet');
+        $formatErr = $this->trans('Could not format the CSS.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+        $versionErr = $this->trans('Could not load that version.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+
         // The script reads the chosen type and toggles related rows. It also
         // exposes hooks (asec-format-css button, version id) consumed by the
         // Checkpoint 05 AJAX layer.
@@ -357,7 +363,50 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
         <script type=\"text/javascript\">
         (function () {
             var snippetId = " . $editVersionsForJs . ";
+            var ajaxUrl = " . json_encode($ajaxUrl) . ";
+            var formatErr = " . json_encode($formatErr) . ";
+            var versionErr = " . json_encode($versionErr) . ";
             function ready(fn){ if(document.readyState!='loading'){fn();}else{document.addEventListener('DOMContentLoaded',fn);} }
+            function codeEl(){ return document.querySelector('textarea[name=\"code\"]'); }
+            function post(params){
+                var body = Object.keys(params).map(function(k){
+                    return encodeURIComponent(k)+'='+encodeURIComponent(params[k]);
+                }).join('&');
+                return fetch(ajaxUrl, {
+                    method:'POST',
+                    headers:{'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest'},
+                    body: body,
+                    credentials:'same-origin'
+                }).then(function(r){ return r.json(); });
+            }
+            function bindFormatCss(){
+                var btn = document.getElementById('asec-format-css');
+                var ta = codeEl();
+                if (!btn || !ta || btn.getAttribute('data-bound')) return;
+                btn.setAttribute('data-bound','1');
+                btn.addEventListener('click', function(){
+                    post({ajax:1, action:'FormatCss', code: ta.value}).then(function(res){
+                        if (res && res.success) { ta.value = res.code; }
+                        else { alert((res && res.error) ? res.error : formatErr); }
+                    }).catch(function(){ alert(formatErr); });
+                });
+            }
+            function bindLoadVersions(){
+                var ta = codeEl();
+                var btns = document.querySelectorAll('.asec-load-version');
+                for (var i=0;i<btns.length;i++){
+                    (function(b){
+                        if (b.getAttribute('data-bound')) return;
+                        b.setAttribute('data-bound','1');
+                        b.addEventListener('click', function(){
+                            post({ajax:1, action:'LoadVersion', id_asec_snippet: snippetId, id_asec_snippet_version: b.getAttribute('data-version-id')}).then(function(res){
+                                if (res && res.success) { if (ta) ta.value = res.code; }
+                                else { alert((res && res.error) ? res.error : versionErr); }
+                            }).catch(function(){ alert(versionErr); });
+                        });
+                    })(btns[i]);
+                }
+            }
             function rowOf(name){ var el=document.querySelector('[name=\"'+name+'\"]'); return el?el.closest('.form-group'):null; }
             function currentType(){ var c=document.querySelector('input[name=\"type\"]:checked'); return c?c.value:'js'; }
             function injectFormatButton(){
@@ -405,6 +454,8 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
                 injectFormatButton();
                 moveVersionsPanel();
                 toggle();
+                bindFormatCss();
+                bindLoadVersions();
                 var radios = document.querySelectorAll('input[name=\"type\"]');
                 for (var i=0;i<radios.length;i++){ radios[i].addEventListener('change', toggle); }
                 window.asecSnippetId = snippetId;
@@ -498,6 +549,11 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
             return false;
         }
 
+        // Auto-format CSS on save when enabled in the module configuration.
+        if ($type === 'css' && (int) Configuration::get(apline_simple_edit_css_js::FORMAT_CSS_KEY) === 1) {
+            $code = self::formatCss($code);
+        }
+
         // Feed validated values into the standard ObjectModel save flow.
         $_POST['name'] = $name;
         $_POST['type'] = $type;
@@ -563,5 +619,163 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
         }
 
         die(json_encode(['success' => true]));
+    }
+
+    /**
+     * AJAX: format a CSS string and return it. Used by the "Format CSS" button.
+     * Token security is handled by the AdminController ajax framework.
+     */
+    public function ajaxProcessFormatCss()
+    {
+        $css = (string) Tools::getValue('code');
+
+        if (!$this->cssBracesBalanced($css)) {
+            $counts = $this->cssBraceCounts($css);
+            die(json_encode([
+                'success' => false,
+                'error' => $this->trans('Unbalanced curly braces in CSS — found %1$d opening and %2$d closing.', [$counts['open'], $counts['close']], 'Modules.Aplinesimpleeditcssjs.Admin'),
+            ]));
+        }
+
+        die(json_encode(['success' => true, 'code' => self::formatCss($css)]));
+    }
+
+    /**
+     * AJAX: return the stored code of a previous version, for "Load into editor".
+     * The version must belong to the snippet currently being edited (ownership
+     * guard) — a posted version id for another snippet is rejected.
+     */
+    public function ajaxProcessLoadVersion()
+    {
+        $idVersion = (int) Tools::getValue('id_asec_snippet_version');
+        $idSnippet = (int) Tools::getValue('id_asec_snippet');
+
+        $code = AplineSimpleEditCssJsSnippet::getVersionCode($idVersion, $idSnippet);
+
+        if ($code === null) {
+            die(json_encode([
+                'success' => false,
+                'error' => $this->trans('That version was not found for this snippet.', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+            ]));
+        }
+
+        die(json_encode(['success' => true, 'code' => $code]));
+    }
+
+    /**
+     * A small dependency-free CSS pretty-printer. It is intentionally simple: a
+     * character-state walk that puts one declaration per line, indents nested
+     * blocks (e.g. media queries), normalizes spacing around ':' and ';', and
+     * keeps block comments verbatim. It is not a full CSS parser; for exotic
+     * input the admin can disable auto-format and format the CSS elsewhere.
+     *
+     * @param string $css
+     *
+     * @return string
+     */
+    public static function formatCss($css)
+    {
+        $css = (string) $css;
+        $len = mb_strlen($css);
+        $out = '';
+        $indent = 0;
+        $i = 0;
+        $atLineStart = true;
+
+        $pad = function ($level) {
+            return str_repeat('    ', max(0, $level));
+        };
+        $trimRight = function (&$buf) {
+            $buf = rtrim($buf, " \t");
+        };
+
+        while ($i < $len) {
+            $ch = mb_substr($css, $i, 1);
+            $next = ($i + 1 < $len) ? mb_substr($css, $i + 1, 1) : '';
+
+            // Preserve block comments verbatim.
+            if ($ch === '/' && $next === '*') {
+                $end = mb_strpos($css, '*/', $i + 2);
+                if ($end === false) {
+                    $end = $len - 2;
+                }
+                $comment = mb_substr($css, $i, $end - $i + 2);
+                if (!$atLineStart) {
+                    $trimRight($out);
+                    $out .= "\n";
+                }
+                $out .= $pad($indent) . $comment . "\n";
+                $atLineStart = true;
+                $i = $end + 2;
+                continue;
+            }
+
+            if ($ch === '{') {
+                $trimRight($out);
+                $out = rtrim($out, "\n");
+                $out .= ' {' . "\n";
+                $indent++;
+                $atLineStart = true;
+                $i++;
+                continue;
+            }
+
+            if ($ch === '}') {
+                $indent--;
+                $trimRight($out);
+                $out = rtrim($out, "\n");
+                $out .= "\n" . $pad($indent) . '}' . "\n";
+                // Blank line after a top-level rule for readability.
+                if ($indent === 0) {
+                    $out .= "\n";
+                }
+                $atLineStart = true;
+                $i++;
+                continue;
+            }
+
+            if ($ch === ';') {
+                $trimRight($out);
+                $out .= ';' . "\n";
+                $atLineStart = true;
+                $i++;
+                continue;
+            }
+
+            if ($ch === ':') {
+                // Space after the colon, none before (declaration separator).
+                $trimRight($out);
+                $out .= ': ';
+                // Skip following whitespace.
+                $i++;
+                while ($i < $len && in_array(mb_substr($css, $i, 1), [' ', "\t"], true)) {
+                    $i++;
+                }
+                $atLineStart = false;
+                continue;
+            }
+
+            // Collapse newlines/tabs/leading whitespace between tokens.
+            if ($ch === "\n" || $ch === "\r" || $ch === "\t") {
+                $i++;
+                continue;
+            }
+            if ($ch === ' ' && $atLineStart) {
+                $i++;
+                continue;
+            }
+
+            if ($atLineStart) {
+                $out .= $pad($indent);
+                $atLineStart = false;
+            }
+            $out .= $ch;
+            $i++;
+        }
+
+        // Collapse 3+ blank lines to a single blank line, trim edges.
+        $out = preg_replace("/\n{3,}/", "\n\n", $out);
+
+        return trim($out) . "\n";
     }
 }
