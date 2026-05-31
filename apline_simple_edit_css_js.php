@@ -18,6 +18,8 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+require_once __DIR__ . '/classes/AplineSimpleEditCssJsSnippet.php';
+
 class apline_simple_edit_css_js extends Module
 {
     const FORMAT_CSS_KEY = 'ASEC_FORMAT_CSS_ON_SAVE';
