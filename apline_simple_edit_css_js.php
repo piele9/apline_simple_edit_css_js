@@ -524,4 +524,80 @@ JS_SEED;
 
         return $helper->generateForm([$fields_form]);
     }
+
+    /**
+     * Render inline into the page <head>: all active CSS first (so styles land
+     * before scripts and avoid a flash of unstyled content), then active JS
+     * placed in the head.
+     *
+     * @param array $params
+     *
+     * @return string
+     */
+    public function hookDisplayHeader($params)
+    {
+        try {
+            $out = '';
+
+            foreach (AplineSimpleEditCssJsSnippet::getActiveSnippets('css') as $snip) {
+                $out .= '<style type="text/css" data-asec-id="' . (int) $snip['id_asec_snippet'] . '">' . "\n"
+                    . $snip['code'] . "\n"
+                    . '</style>' . "\n";
+            }
+
+            foreach (AplineSimpleEditCssJsSnippet::getActiveSnippets('js', 'head') as $snip) {
+                $out .= $this->wrapJs($snip);
+            }
+
+            return $out;
+        } catch (\Throwable $e) {
+            PrestaShopLogger::addLog('apline_simple_edit_css_js: ' . $e->getMessage(), 3);
+
+            return '';
+        }
+    }
+
+    /**
+     * Render active JS placed just before </body>.
+     *
+     * @param array $params
+     *
+     * @return string
+     */
+    public function hookDisplayBeforeBodyClosingTag($params)
+    {
+        try {
+            $out = '';
+            foreach (AplineSimpleEditCssJsSnippet::getActiveSnippets('js', 'body_end') as $snip) {
+                $out .= $this->wrapJs($snip);
+            }
+
+            return $out;
+        } catch (\Throwable $e) {
+            PrestaShopLogger::addLog('apline_simple_edit_css_js: ' . $e->getMessage(), 3);
+
+            return '';
+        }
+    }
+
+    /**
+     * Wrap a JS snippet in a <script> tag. When load_when is "on_ready" the code
+     * runs after DOMContentLoaded; "immediate" runs it inline as parsed.
+     * The code is emitted verbatim (admin-trusted input — see the class header).
+     *
+     * @param array $snip
+     *
+     * @return string
+     */
+    private function wrapJs(array $snip)
+    {
+        $code = (string) $snip['code'];
+        if (isset($snip['load_when']) && $snip['load_when'] === 'on_ready') {
+            $code = "document.addEventListener('DOMContentLoaded', function () {\n" . $code . "\n});";
+        }
+
+        return '<script type="text/javascript" data-asec-id="' . (int) $snip['id_asec_snippet'] . '">' . "\n"
+            . $code . "\n"
+            . '</script>' . "\n";
+    }
 }
