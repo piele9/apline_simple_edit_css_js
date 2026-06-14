@@ -237,7 +237,11 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
                         ['id' => 'type_js', 'value' => 'js', 'label' => 'JavaScript'],
                         ['id' => 'type_css', 'value' => 'css', 'label' => 'CSS'],
                     ],
-                    'desc' => $this->trans('CSS is injected as inline <style>; JS as inline <script>.', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                    // HelperForm renders desc/label as raw HTML, so the angle
+                    // brackets are written as entities — a literal <style> here
+                    // would put the browser into RAWTEXT mode and swallow the
+                    // rest of the form (Code/Location/Load when/Active/Save).
+                    'desc' => $this->trans('CSS is injected as inline &lt;style&gt;; JS as inline &lt;script&gt;.', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                 ],
                 [
                     'type' => 'textarea',
@@ -256,8 +260,8 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
                     'required' => true,
                     'class' => 't',
                     'values' => [
-                        ['id' => 'location_head', 'value' => 'head', 'label' => $this->trans('Inline in <head>', [], 'Modules.Aplinesimpleeditcssjs.Admin')],
-                        ['id' => 'location_body_end', 'value' => 'body_end', 'label' => $this->trans('Just before </body> (JS only)', [], 'Modules.Aplinesimpleeditcssjs.Admin')],
+                        ['id' => 'location_head', 'value' => 'head', 'label' => $this->trans('Inline in &lt;head&gt;', [], 'Modules.Aplinesimpleeditcssjs.Admin')],
+                        ['id' => 'location_body_end', 'value' => 'body_end', 'label' => $this->trans('Just before &lt;/body&gt; (JS only)', [], 'Modules.Aplinesimpleeditcssjs.Admin')],
                     ],
                 ],
                 [
@@ -531,7 +535,8 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
             $this->errors[] = $this->trans('Invalid location.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
         } elseif ($type === 'css' && $location !== 'head') {
             // CSS in body_end works but is bad practice — reject it.
-            $this->errors[] = $this->trans('CSS snippets must be placed in <head>.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+            // Error messages are rendered as HTML by displayError; escape the tag.
+            $this->errors[] = $this->trans('CSS snippets must be placed in &lt;head&gt;.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
         }
 
         // 5. Load_when whitelist (meaningful for JS; kept for CSS for field consistency).
