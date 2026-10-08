@@ -38,41 +38,41 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
                 'class' => 'fixed-width-xs',
             ],
             'name' => [
-                'title' => $this->trans('Name', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                'title' => $this->trans('Nazwa', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
             ],
             'type' => [
-                'title' => $this->trans('Type', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                'title' => $this->trans('Typ', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                 'align' => 'center',
                 'callback' => 'printType',
                 'search' => false,
             ],
             'location' => [
-                'title' => $this->trans('Location', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                'title' => $this->trans('Miejsce wstawienia', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                 'align' => 'center',
                 'callback' => 'printLocation',
                 'search' => false,
             ],
             'load_when' => [
-                'title' => $this->trans('Load when', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                'title' => $this->trans('Kiedy uruchomić', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                 'align' => 'center',
                 'callback' => 'printLoadWhen',
                 'search' => false,
             ],
             'code' => [
-                'title' => $this->trans('Code preview', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                'title' => $this->trans('Podgląd kodu', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                 'callback' => 'printCodePreview',
                 'orderby' => false,
                 'search' => false,
             ],
             'active' => [
-                'title' => $this->trans('Active', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                'title' => $this->trans('Aktywny', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                 'align' => 'center',
                 'active' => 'active',
                 'type' => 'bool',
                 'orderby' => false,
             ],
             'position' => [
-                'title' => $this->trans('Position', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                'title' => $this->trans('Pozycja', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                 'align' => 'center',
                 'position' => 'position',
                 'search' => false,
@@ -86,8 +86,8 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
         $this->addRowAction('delete');
         $this->bulk_actions = [
             'delete' => [
-                'text' => $this->trans('Delete selected', [], 'Admin.Actions'),
-                'confirm' => $this->trans('Delete selected items?', [], 'Admin.Notifications.Warning'),
+                'text' => $this->trans('Usuń zaznaczone', [], 'Admin.Actions'),
+                'confirm' => $this->trans('Usunąć zaznaczone elementy?', [], 'Admin.Notifications.Warning'),
             ],
         ];
     }
@@ -96,6 +96,8 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
     {
         parent::setMedia($isNewTheme);
         $this->addJqueryUI('ui.sortable');
+        // Shared big-button class (.apline-btn-duzy) and action bar styles.
+        $this->addCSS(_MODULE_DIR_ . 'apline_simple_edit_css_js/views/css/admin.css');
     }
 
     /**
@@ -111,13 +113,36 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
         ]);
     }
 
+    /**
+     * Polish labels for the standard toolbar buttons (the core labels depend on
+     * the installed language pack, so the module sets its own texts).
+     */
+    public function initToolbar()
+    {
+        parent::initToolbar();
+
+        if (isset($this->toolbar_btn['new'])) {
+            $this->toolbar_btn['new']['desc'] = $this->trans('Dodaj fragment', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+        }
+        if (isset($this->toolbar_btn['save'])) {
+            $this->toolbar_btn['save']['desc'] = $this->trans('Zapisz', [], 'Admin.Actions');
+        }
+        if (isset($this->toolbar_btn['cancel'])) {
+            $this->toolbar_btn['cancel']['desc'] = $this->trans('Anuluj', [], 'Admin.Actions');
+        }
+    }
+
     public function initPageHeaderToolbar()
     {
         parent::initPageHeaderToolbar();
 
+        if (isset($this->page_header_toolbar_btn['new'])) {
+            $this->page_header_toolbar_btn['new']['desc'] = $this->trans('Dodaj fragment', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+        }
+
         $this->page_header_toolbar_btn['back_to_config'] = [
             'href' => $this->getConfigUrl(),
-            'desc' => $this->trans('Back to configuration', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+            'desc' => $this->trans('Wróć do konfiguracji', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
             'icon' => 'process-icon-back',
         ];
     }
@@ -126,18 +151,27 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
     {
         $list = parent::renderList();
 
-        // Breadcrumb-style back link + mandatory APLINE attribution under the table.
-        $back = '<div style="margin:10px 0;"><a class="btn btn-default" href="'
+        // Action bar above the table: the main action ("Dodaj fragment") is a big
+        // button, the way back to the configuration page stays a standard one.
+        $addUrl = AdminController::$currentIndex . '&add' . $this->table . '&token=' . $this->token;
+        $bar = '<div class="apline-pasek-akcji">'
+            . '<a class="btn btn-primary btn-lg apline-btn-duzy" href="'
+            . htmlspecialchars($addUrl, ENT_QUOTES)
+            . '"><i class="icon-plus-circle"></i> '
+            . $this->trans('Dodaj fragment', [], 'Modules.Aplinesimpleeditcssjs.Admin')
+            . '</a>'
+            . '<a class="btn btn-default" href="'
             . htmlspecialchars($this->getConfigUrl(), ENT_QUOTES)
             . '"><i class="icon-chevron-left"></i> '
-            . $this->trans('Back to configuration', [], 'Modules.Aplinesimpleeditcssjs.Admin')
+            . $this->trans('Wróć do konfiguracji', [], 'Modules.Aplinesimpleeditcssjs.Admin')
             . '</a></div>';
 
+        // Mandatory APLINE attribution under the table.
         $credit = method_exists($this->module, 'renderAplineFooter')
             ? $this->module->renderAplineFooter()
             : '';
 
-        return $back . $list . $credit;
+        return $bar . $list . $credit;
     }
 
     /**
@@ -183,10 +217,10 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
             return '<span class="text-muted">&mdash;</span>';
         }
         if ($loadWhen === 'on_ready') {
-            return $this->trans('On DOMReady', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+            return $this->trans('Po DOMContentLoaded', [], 'Modules.Aplinesimpleeditcssjs.Admin');
         }
 
-        return $this->trans('Immediate', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+        return $this->trans('Natychmiast', [], 'Modules.Aplinesimpleeditcssjs.Admin');
     }
 
     /**
@@ -216,20 +250,20 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
 
         $this->fields_form = [
             'legend' => [
-                'title' => $this->trans('CSS / JS snippet', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                'title' => $this->trans('Fragment CSS / JS', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                 'icon' => 'icon-code',
             ],
             'input' => [
                 [
                     'type' => 'text',
-                    'label' => $this->trans('Name', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                    'label' => $this->trans('Nazwa', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                     'name' => 'name',
                     'required' => true,
                     'maxlength' => 255,
                 ],
                 [
                     'type' => 'radio',
-                    'label' => $this->trans('Type', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                    'label' => $this->trans('Typ', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                     'name' => 'type',
                     'required' => true,
                     'class' => 't',
@@ -241,53 +275,59 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
                     // brackets are written as entities — a literal <style> here
                     // would put the browser into RAWTEXT mode and swallow the
                     // rest of the form (Code/Location/Load when/Active/Save).
-                    'desc' => $this->trans('CSS is injected as inline &lt;style&gt;; JS as inline &lt;script&gt;.', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                    'desc' => $this->trans('CSS jest wstawiany jako &lt;style&gt;, a JS jako &lt;script&gt; — bezpośrednio w kodzie strony.', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                 ],
                 [
                     'type' => 'textarea',
-                    'label' => $this->trans('Code', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                    'label' => $this->trans('Kod', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                     'name' => 'code',
                     'required' => true,
                     'cols' => 80,
                     'rows' => 20,
                     'class' => 'asec-code-textarea',
-                    'desc' => $this->trans('The snippet code is injected verbatim into the front-end. Test on staging first.', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                    'desc' => $this->trans('Kod fragmentu jest wstawiany na stronę sklepu bez żadnych zmian. Najpierw przetestuj go na kopii testowej sklepu.', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                 ],
                 [
                     'type' => 'radio',
-                    'label' => $this->trans('Location', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                    'label' => $this->trans('Miejsce wstawienia', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                     'name' => 'location',
                     'required' => true,
                     'class' => 't',
                     'values' => [
-                        ['id' => 'location_head', 'value' => 'head', 'label' => $this->trans('Inline in &lt;head&gt;', [], 'Modules.Aplinesimpleeditcssjs.Admin')],
-                        ['id' => 'location_body_end', 'value' => 'body_end', 'label' => $this->trans('Just before &lt;/body&gt; (JS only)', [], 'Modules.Aplinesimpleeditcssjs.Admin')],
+                        ['id' => 'location_head', 'value' => 'head', 'label' => $this->trans('Bezpośrednio w &lt;head&gt;', [], 'Modules.Aplinesimpleeditcssjs.Admin')],
+                        ['id' => 'location_body_end', 'value' => 'body_end', 'label' => $this->trans('Tuż przed &lt;/body&gt; (tylko JS)', [], 'Modules.Aplinesimpleeditcssjs.Admin')],
                     ],
                 ],
                 [
                     'type' => 'radio',
-                    'label' => $this->trans('Load when', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                    'label' => $this->trans('Kiedy uruchomić', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                     'name' => 'load_when',
                     'required' => true,
                     'class' => 't',
                     'values' => [
-                        ['id' => 'load_immediate', 'value' => 'immediate', 'label' => $this->trans('Execute immediately', [], 'Modules.Aplinesimpleeditcssjs.Admin')],
-                        ['id' => 'load_on_ready', 'value' => 'on_ready', 'label' => $this->trans('After DOMContentLoaded', [], 'Modules.Aplinesimpleeditcssjs.Admin')],
+                        ['id' => 'load_immediate', 'value' => 'immediate', 'label' => $this->trans('Uruchom natychmiast', [], 'Modules.Aplinesimpleeditcssjs.Admin')],
+                        ['id' => 'load_on_ready', 'value' => 'on_ready', 'label' => $this->trans('Po załadowaniu struktury strony (DOMContentLoaded)', [], 'Modules.Aplinesimpleeditcssjs.Admin')],
                     ],
-                    'desc' => $this->trans('Only applies to JavaScript snippets.', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                    'desc' => $this->trans('Dotyczy tylko fragmentów JavaScript.', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                 ],
                 [
                     'type' => 'switch',
-                    'label' => $this->trans('Active', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                    'label' => $this->trans('Aktywny', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                     'name' => 'active',
                     'is_bool' => true,
                     'values' => [
-                        ['id' => 'active_on', 'value' => 1, 'label' => $this->trans('Yes', [], 'Admin.Global')],
-                        ['id' => 'active_off', 'value' => 0, 'label' => $this->trans('No', [], 'Admin.Global')],
+                        ['id' => 'active_on', 'value' => 1, 'label' => $this->trans('Tak', [], 'Admin.Global')],
+                        ['id' => 'active_off', 'value' => 0, 'label' => $this->trans('Nie', [], 'Admin.Global')],
                     ],
                 ],
             ],
-            'submit' => ['title' => $this->trans('Save', [], 'Admin.Actions')],
+            // The page footer toolbar replaces this button with its own "Zapisz"
+            // (and takes this label); the script below enlarges that one too.
+            'submit' => [
+                'title' => $this->trans('Zapisz', [], 'Admin.Actions'),
+                'class' => 'btn btn-primary btn-lg apline-btn-duzy pull-right',
+                'icon' => 'icon-save',
+            ],
         ];
 
         // Default values for a brand-new snippet (radios need an initial pick).
@@ -331,27 +371,27 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
                         . '<code>' . htmlspecialchars((string) $v['date_add'], ENT_QUOTES) . '</code> '
                         . '<button type="button" class="btn btn-default btn-xs asec-load-version" '
                         . 'data-version-id="' . (int) $v['id_asec_snippet_version'] . '">'
-                        . $this->trans('Load into editor', [], 'Modules.Aplinesimpleeditcssjs.Admin')
+                        . $this->trans('Wczytaj do edytora', [], 'Modules.Aplinesimpleeditcssjs.Admin')
                         . '</button></li>';
                 }
                 $versionsHtml = '<div class="panel asec-versions-panel" style="display:none;">'
                     . '<h3><i class="icon-history"></i> '
-                    . $this->trans('Previous versions (last 3)', [], 'Modules.Aplinesimpleeditcssjs.Admin')
+                    . $this->trans('Poprzednie wersje (ostatnie 3)', [], 'Modules.Aplinesimpleeditcssjs.Admin')
                     . '</h3><ul style="list-style:none;padding-left:0;margin:0;">' . $rows . '</ul>'
                     . '<p class="text-muted" style="font-size:12px;">'
-                    . $this->trans('Loading a version only fills the editor. You still have to Save to apply it.', [], 'Modules.Aplinesimpleeditcssjs.Admin')
+                    . $this->trans('Wczytanie wersji tylko uzupełnia edytor. Aby ją zastosować, nadal musisz kliknąć „Zapisz”.', [], 'Modules.Aplinesimpleeditcssjs.Admin')
                     . '</p></div>';
             }
         }
 
         $editVersionsForJs = $isEdit ? (int) $obj->id : 0;
-        $formatBtnLabel = $this->trans('Format CSS', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+        $formatBtnLabel = $this->trans('Formatuj CSS', [], 'Modules.Aplinesimpleeditcssjs.Admin');
 
         // AJAX endpoint for this controller, token included. The action name is
         // appended by the JS (FormatCss / LoadVersion).
         $ajaxUrl = $this->context->link->getAdminLink('AdminAplineSimpleEditCssJsSnippet');
-        $formatErr = $this->trans('Could not format the CSS.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
-        $versionErr = $this->trans('Could not load that version.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+        $formatErr = $this->trans('Nie udało się sformatować CSS.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+        $versionErr = $this->trans('Nie udało się wczytać tej wersji.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
 
         // The script reads the chosen type and toggles related rows. It also
         // exposes hooks (asec-format-css button, version id) consumed by the
@@ -454,9 +494,16 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
                 var panel = document.querySelector('.asec-versions-panel');
                 if (panel) panel.style.display = '';
             }
+            function enlargeSave(){
+                // The footer toolbar draws its own Save button (and hides the form's one);
+                // make it a big main-action button like the rest of the module.
+                var saves = document.querySelectorAll('#toolbar-footer a.btn-primary');
+                for (var i=0;i<saves.length;i++){ saves[i].classList.add('btn-lg','apline-btn-duzy'); }
+            }
             ready(function(){
                 injectFormatButton();
                 moveVersionsPanel();
+                enlargeSave();
                 toggle();
                 bindFormatCss();
                 bindLoadVersions();
@@ -479,7 +526,7 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
             if ($isUpdate) {
                 $existing = new AplineSimpleEditCssJsSnippet((int) Tools::getValue($this->identifier));
                 if (!Validate::isLoadedObject($existing)) {
-                    $this->errors[] = $this->trans('The snippet you are trying to edit does not exist.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+                    $this->errors[] = $this->trans('Edytowany fragment nie istnieje.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
 
                     return false;
                 }
@@ -515,39 +562,39 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
 
         // 1. Name required + max length (reject, never truncate).
         if ($name === '') {
-            $this->errors[] = $this->trans('The field "Name" is required.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+            $this->errors[] = $this->trans('Pole „Nazwa” jest wymagane.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
         } elseif (mb_strlen($name) > self::MAX_STRING) {
-            $this->errors[] = $this->trans('The field "Name" exceeds the maximum length of 255 characters.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+            $this->errors[] = $this->trans('Pole „Nazwa” przekracza maksymalną długość 255 znaków.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
         }
 
         // 2. Type whitelist.
         if (!in_array($type, self::ALLOWED_TYPES, true)) {
-            $this->errors[] = $this->trans('Invalid snippet type. Allowed: CSS, JS.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+            $this->errors[] = $this->trans('Nieprawidłowy typ fragmentu. Dozwolone: CSS, JS.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
         }
 
         // 3. Code required (an empty snippet is meaningless).
         if (trim($code) === '') {
-            $this->errors[] = $this->trans('The field "Code" is required — an empty snippet has no effect.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+            $this->errors[] = $this->trans('Pole „Kod” jest wymagane — pusty fragment nic nie robi.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
         }
 
         // 4. Location whitelist, dependent on type.
         if (!in_array($location, self::ALLOWED_LOCATIONS, true)) {
-            $this->errors[] = $this->trans('Invalid location.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+            $this->errors[] = $this->trans('Nieprawidłowe miejsce wstawienia.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
         } elseif ($type === 'css' && $location !== 'head') {
             // CSS in body_end works but is bad practice — reject it.
             // Error messages are rendered as HTML by displayError; escape the tag.
-            $this->errors[] = $this->trans('CSS snippets must be placed in &lt;head&gt;.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+            $this->errors[] = $this->trans('Fragmenty CSS muszą być umieszczone w &lt;head&gt;.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
         }
 
         // 5. Load_when whitelist (meaningful for JS; kept for CSS for field consistency).
         if (!in_array($loadWhen, self::ALLOWED_LOAD_WHEN, true)) {
-            $this->errors[] = $this->trans('Invalid "Load when" value.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+            $this->errors[] = $this->trans('Nieprawidłowa wartość pola „Kiedy uruchomić”.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
         }
 
         // 6. CSS balance check (only for CSS).
         if ($type === 'css' && trim($code) !== '' && !$this->cssBracesBalanced($code)) {
             $counts = $this->cssBraceCounts($code);
-            $this->errors[] = $this->trans('Unbalanced curly braces in CSS — found %1$d opening and %2$d closing.', [$counts['open'], $counts['close']], 'Modules.Aplinesimpleeditcssjs.Admin');
+            $this->errors[] = $this->trans('Niedomknięte nawiasy klamrowe w CSS — znaleziono %1$d otwierających i %2$d zamykających.', [$counts['open'], $counts['close']], 'Modules.Aplinesimpleeditcssjs.Admin');
         }
 
         if (!empty($this->errors)) {
@@ -638,7 +685,7 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
             $counts = $this->cssBraceCounts($css);
             die(json_encode([
                 'success' => false,
-                'error' => $this->trans('Unbalanced curly braces in CSS — found %1$d opening and %2$d closing.', [$counts['open'], $counts['close']], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                'error' => $this->trans('Niedomknięte nawiasy klamrowe w CSS — znaleziono %1$d otwierających i %2$d zamykających.', [$counts['open'], $counts['close']], 'Modules.Aplinesimpleeditcssjs.Admin'),
             ]));
         }
 
@@ -660,7 +707,7 @@ class AdminAplineSimpleEditCssJsSnippetController extends ModuleAdminController
         if ($code === null) {
             die(json_encode([
                 'success' => false,
-                'error' => $this->trans('That version was not found for this snippet.', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                'error' => $this->trans('Nie znaleziono tej wersji dla tego fragmentu.', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
             ]));
         }
 

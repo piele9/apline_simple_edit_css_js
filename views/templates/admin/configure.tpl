@@ -3,13 +3,13 @@
  * @author APLINE Arkadiusz Pielechowski
  *}
 <div class="panel">
-  <h3><i class="icon-code"></i> {l s='Simple Edit CSS/JS' d='Modules.Aplinesimpleeditcssjs.Admin'}</h3>
-  <p>{l s='Inject custom CSS and JavaScript snippets into the front-end without editing your theme. Each snippet is rendered inline on every front-end page.' d='Modules.Aplinesimpleeditcssjs.Admin'}</p>
+  <h3><i class="icon-code"></i> {l s='Fragmenty CSS/JS' d='Modules.Aplinesimpleeditcssjs.Admin'}</h3>
+  <p>{l s='Wstawiaj własne fragmenty CSS i JavaScript na stronę sklepu bez edytowania motywu. Każdy aktywny fragment jest wstawiany bezpośrednio w kod każdej strony sklepu.' d='Modules.Aplinesimpleeditcssjs.Admin'}</p>
   <p class="alert alert-warning">
     <i class="icon-warning"></i>
-    {l s='Snippets can break your storefront if the code contains errors. Always test on a staging copy before enabling a snippet in production.' d='Modules.Aplinesimpleeditcssjs.Admin'}
+    {l s='Fragment z błędem w kodzie może zepsuć wygląd lub działanie sklepu. Zawsze testuj go na kopii testowej, zanim włączysz go w działającym sklepie.' d='Modules.Aplinesimpleeditcssjs.Admin'}
   </p>
-  <a href="{$asec_manage_url|escape:'html':'UTF-8'}" class="btn btn-primary">
-    <i class="icon-list"></i> {l s='Manage snippets' d='Modules.Aplinesimpleeditcssjs.Admin'}
+  <a href="{$asec_manage_url|escape:'html':'UTF-8'}" class="btn btn-primary btn-lg apline-btn-duzy">
+    <i class="icon-list"></i> {l s='Zarządzaj fragmentami CSS/JS' d='Modules.Aplinesimpleeditcssjs.Admin'}
   </a>
 </div>

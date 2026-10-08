@@ -36,8 +36,8 @@ class apline_simple_edit_css_js extends Module
     public static function getAvailableHooks()
     {
         return [
-            'displayHeader' => 'Page <head> (inline CSS + JS)',
-            'displayBeforeBodyClosingTag' => 'Before </body> (inline JS)',
+            'displayHeader' => 'Nagłówek strony <head> (CSS i JS w treści strony)',
+            'displayBeforeBodyClosingTag' => 'Przed </body> (JS w treści strony)',
         ];
     }
 
@@ -45,18 +45,18 @@ class apline_simple_edit_css_js extends Module
     {
         $this->name = 'apline_simple_edit_css_js';
         $this->tab = 'front_office_features';
-        $this->version = '1.0.0';
+        $this->version = '1.1.0';
         $this->author = 'APLINE Arkadiusz Pielechowski';
         $this->need_instance = false;
         $this->bootstrap = true;
 
         parent::__construct();
 
-        $this->displayName = $this->trans('APLINE Simple Edit CSS/JS for PrestaShop 9', [], 'Modules.Aplinesimpleeditcssjs.Admin');
-        $this->description = $this->trans('Inject custom CSS and JavaScript snippets into the front-end without editing your theme. Manage snippets like rows: drag & drop ordering, enable/disable, edit.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
-        $this->confirmUninstall = $this->trans('Are you sure you want to uninstall this module? All snippets and their version history will be deleted.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+        $this->displayName = $this->trans('APLINE Simple Edit CSS/JS dla PrestaShop 9', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+        $this->description = $this->trans('Wstawiaj własne fragmenty CSS i JavaScript na stronę sklepu bez edytowania motywu. Fragmentami zarządzasz jak wierszami: kolejność przeciągasz myszą, włączasz i wyłączasz je oraz edytujesz.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+        $this->confirmUninstall = $this->trans('Czy na pewno chcesz odinstalować ten moduł? Wszystkie fragmenty i historia ich wersji zostaną usunięte.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
 
-        $this->ps_versions_compliancy = ['min' => '9.0', 'max' => _PS_VERSION_];
+        $this->ps_versions_compliancy = ['min' => '9.0.0', 'max' => _PS_VERSION_];
     }
 
     public function install()
@@ -72,7 +72,7 @@ class apline_simple_edit_css_js extends Module
         ) {
             // Roll back to a clean state so the shop is never left half-installed.
             $this->uninstall();
-            $this->_errors[] = $this->trans('Installation failed and was rolled back. Please check the database permissions and try again.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
+            $this->_errors[] = $this->trans('Instalacja nie powiodła się i została wycofana. Sprawdź uprawnienia bazy danych i spróbuj ponownie.', [], 'Modules.Aplinesimpleeditcssjs.Admin');
 
             return false;
         }
@@ -177,21 +177,22 @@ class apline_simple_edit_css_js extends Module
     }
 
     /**
-     * Definition of the two starter snippets.
+     * Definition of the two starter snippets. They are generic, educational
+     * examples (no shop-specific code); both are written in Polish.
      *
      * @return array
      */
     private function getSeedSnippets()
     {
         $cssPlaceholder = "/*\n"
-            . " * Add your custom CSS here.\n"
-            . " * This snippet is injected inline in the page <head>\n"
-            . " * on every front-end page of the shop.\n"
+            . " * Tutaj wpisz własny CSS.\n"
+            . " * Ten fragment jest wstawiany bezpośrednio w sekcji <head>\n"
+            . " * na każdej stronie sklepu.\n"
             . " */\n";
 
         return [
             [
-                'name' => 'Custom CSS placeholder',
+                'name' => 'Miejsce na własny CSS',
                 'type' => 'css',
                 'code' => $cssPlaceholder,
                 'location' => 'head',
@@ -199,7 +200,7 @@ class apline_simple_edit_css_js extends Module
                 'active' => 1,
             ],
             [
-                'name' => 'YouTube embed player in product description',
+                'name' => 'Odtwarzacz YouTube w opisie produktu',
                 'type' => 'js',
                 'code' => $this->getYoutubeSeedJs(),
                 'location' => 'body_end',
@@ -219,50 +220,49 @@ class apline_simple_edit_css_js extends Module
     {
         return <<<'JS_SEED'
 /*
- * Example snippet — DISABLED by default.
+ * Przykładowy fragment — domyślnie WYŁĄCZONY.
  *
- * What it does:
- *   Scans every <a href="*youtube.com/watch?v=ID"> inside
- *   .product__description and converts the static thumbnail into
- *   a clickable in-page player. Click loads the actual YouTube
- *   iframe with autoplay. No external assets, no third-party JS
- *   on page load (lite-embed pattern).
+ * Co robi:
+ *   Przeszukuje każdy link <a href="*youtube.com/watch?v=ID"> wewnątrz
+ *   .product__description i zamienia statyczną miniaturę na klikalny
+ *   odtwarzacz na stronie. Kliknięcie ładuje właściwy iframe YouTube
+ *   z autoodtwarzaniem. Bez zewnętrznych zasobów i skryptów stron
+ *   trzecich przy ładowaniu strony (wzorzec „lite embed”).
  *
- * How to use:
- *   1. Turn the "Active" switch on (snippet list view).
- *   2. Add a YouTube link to a product description in BO with this
- *      HTML pattern (the visual editor's "embed YouTube" usually
- *      produces it):
+ * Jak użyć:
+ *   1. Włącz przełącznik „Aktywny” tego fragmentu (lista fragmentów).
+ *   2. Dodaj link do YouTube w opisie produktu w panelu, w takim układzie
+ *      HTML (edytor wizualny po wstawieniu filmu zwykle go tworzy):
  *        <p><a href="https://www.youtube.com/watch?v=XXX"
  *             target="_blank" rel="noreferrer noopener">
  *          <img src="https://img.youtube.com/vi/XXX/hqdefault.jpg"
  *               alt="...">
  *        </a></p>
- *   3. Open the product on the front-end. Click the thumbnail.
+ *   3. Otwórz produkt w sklepie i kliknij miniaturę.
  *
- * How to customize:
- *   - Container selector: change CONFIG.containerSelector below
- *     if your theme uses a different class for the description
- *     (e.g. '.product-description', '#product-description').
- *   - Autoplay on click: set CONFIG.autoplayOnClick = false.
- *   - Visual style: edit the STYLE constant (play button color,
- *     border-radius, hover effect).
+ * Jak dostosować:
+ *   - Selektor kontenera: zmień CONFIG.containerSelector poniżej,
+ *     jeśli motyw używa innej klasy dla opisu
+ *     (np. '.product-description', '#product-description').
+ *   - Autoodtwarzanie po kliknięciu: ustaw CONFIG.autoplayOnClick = false.
+ *   - Wygląd: edytuj stałą STYLE (kolor przycisku odtwarzania,
+ *     zaokrąglenie rogów, efekt po najechaniu).
  */
 (function () {
     'use strict';
 
-    // === CONFIG (edit me in the Back Office) ===
+    // === USTAWIENIA (edytuj w panelu) ===
     var CONFIG = {
         containerSelector: '.product__description',
-        // alternative selectors for different themes:
+        // alternatywne selektory dla innych motywów:
         // '.product-description', '#product-description', '[itemprop="description"]'
         autoplayOnClick: true,
-        injectStyle: true // injects the bundled CSS on first run
+        injectStyle: true // wstawia dołączony CSS przy pierwszym uruchomieniu
     };
 
     var YT_REGEX = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/;
 
-    // === STYLE (inline, injected once on first run) ===
+    // === STYL (wstawiany raz, przy pierwszym uruchomieniu) ===
     var STYLE = [
         '.asec-yt-player{',
         '  position:relative;display:block;width:100%;max-width:100%;',
@@ -313,7 +313,7 @@ class apline_simple_edit_css_js extends Module
         var id = extractVideoId(href);
         if (!id) return;
 
-        // Thumbnail: use the anchor's <img> if present, else the YT API URL.
+        // Miniatura: weź <img> z linku, a gdy go brak — adres z API YouTube.
         var img = a.querySelector('img');
         var thumbUrl = img && img.getAttribute('src')
             ? img.getAttribute('src')
@@ -322,7 +322,7 @@ class apline_simple_edit_css_js extends Module
         var player = document.createElement('div');
         player.className = 'asec-yt-player';
         player.setAttribute('role', 'button');
-        player.setAttribute('aria-label', 'Play video');
+        player.setAttribute('aria-label', 'Odtwórz film');
         player.setAttribute('tabindex', '0');
         player.setAttribute('data-asec-yt-id', id);
         player.style.backgroundImage = 'url("' + thumbUrl.replace(/"/g, '%22') + '")';
@@ -347,7 +347,7 @@ class apline_simple_edit_css_js extends Module
             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); launch(); }
         });
 
-        // Replace the <a> with our player, keeping the wrapper for theme margins.
+        // Zastąp <a> odtwarzaczem, zostawiając otoczkę (marginesy motywu).
         a.parentNode.replaceChild(player, a);
     }
 
@@ -402,7 +402,7 @@ JS_SEED;
         // Hidden tab (no visible parent): managed from the module configuration page.
         $tab->id_parent = -1;
         foreach (Language::getLanguages(false) as $lang) {
-            $tab->name[$lang['id_lang']] = 'Simple Edit CSS/JS';
+            $tab->name[$lang['id_lang']] = 'Fragmenty CSS/JS';
         }
 
         return (bool) $tab->add();
@@ -431,10 +431,13 @@ JS_SEED;
     {
         $output = '';
 
+        // Admin stylesheet with the shared big-button class (.apline-btn-duzy).
+        $this->context->controller->addCSS($this->_path . 'views/css/admin.css');
+
         if (Tools::isSubmit('submitAsecConfig')) {
             $format = (int) (bool) Tools::getValue(self::FORMAT_CSS_KEY);
             Configuration::updateValue(self::FORMAT_CSS_KEY, $format);
-            $output .= $this->displayConfirmation($this->trans('Settings updated.', [], 'Modules.Aplinesimpleeditcssjs.Admin'));
+            $output .= $this->displayConfirmation($this->trans('Ustawienia zostały zapisane.', [], 'Modules.Aplinesimpleeditcssjs.Admin'));
         }
 
         $manageUrl = $this->context->link->getAdminLink(self::ADMIN_CONTROLLER);
@@ -463,7 +466,7 @@ JS_SEED;
             .apline-credit a { font-weight: 600; }
         </style>
         <div class="apline-credit">
-            ' . $this->trans('Module created by', [], 'Modules.Aplinesimpleeditcssjs.Admin') . '
+            ' . $this->trans('Moduł stworzony przez', [], 'Modules.Aplinesimpleeditcssjs.Admin') . '
             <a href="https://apline.pl" target="_blank" rel="noopener noreferrer">APLINE</a>
         </div>';
     }
@@ -477,8 +480,8 @@ JS_SEED;
     {
         return '
         <div class="panel">
-            <h3>&#9749; ' . $this->trans('Like this module?', [], 'Modules.Aplinesimpleeditcssjs.Admin') . '</h3>
-            <p>' . $this->trans('Need custom PrestaShop development, performance optimization or integrations?', [], 'Modules.Aplinesimpleeditcssjs.Admin') . '</p>
+            <h3>&#9749; ' . $this->trans('Podoba Ci się ten moduł?', [], 'Modules.Aplinesimpleeditcssjs.Admin') . '</h3>
+            <p>' . $this->trans('Potrzebujesz rozwiązań dla PrestaShop na zamówienie, optymalizacji wydajności lub integracji?', [], 'Modules.Aplinesimpleeditcssjs.Admin') . '</p>
             <a class="btn btn-default" href="https://apline.pl" target="_blank" rel="noopener noreferrer">&#8594; APLINE.PL</a>
         </div>';
     }
@@ -491,23 +494,27 @@ JS_SEED;
         $fields_form = [
             'form' => [
                 'legend' => [
-                    'title' => $this->trans('Settings', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                    'title' => $this->trans('Ustawienia', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                     'icon' => 'icon-cogs',
                 ],
                 'input' => [
                     [
                         'type' => 'switch',
-                        'label' => $this->trans('Auto-format CSS on save', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                        'label' => $this->trans('Automatycznie formatuj CSS przy zapisie', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                         'name' => self::FORMAT_CSS_KEY,
                         'is_bool' => true,
-                        'desc' => $this->trans('When enabled, CSS snippets are automatically reformatted when saved. Disable it if you maintain your own formatting.', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
+                        'desc' => $this->trans('Po włączeniu fragmenty CSS są automatycznie formatowane podczas zapisu. Wyłącz, jeśli samodzielnie dbasz o formatowanie.', [], 'Modules.Aplinesimpleeditcssjs.Admin'),
                         'values' => [
-                            ['id' => 'format_on', 'value' => 1, 'label' => $this->trans('Yes', [], 'Admin.Global')],
-                            ['id' => 'format_off', 'value' => 0, 'label' => $this->trans('No', [], 'Admin.Global')],
+                            ['id' => 'format_on', 'value' => 1, 'label' => $this->trans('Tak', [], 'Admin.Global')],
+                            ['id' => 'format_off', 'value' => 0, 'label' => $this->trans('Nie', [], 'Admin.Global')],
                         ],
                     ],
                 ],
-                'submit' => ['title' => $this->trans('Save', [], 'Admin.Actions')],
+                'submit' => [
+                    'title' => $this->trans('Zapisz', [], 'Admin.Actions'),
+                    'class' => 'btn btn-primary btn-lg apline-btn-duzy pull-right',
+                    'icon' => 'icon-save',
+                ],
             ],
         ];
 

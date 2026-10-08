@@ -1,13 +1,11 @@
-# Screenshots
+# Dokumentacja
 
-Placeholder folder for README screenshots. Add before publishing the release:
+Pełny opis modułu (funkcje, instalacja, konfiguracja krok po kroku, aktualizacja, odinstalowanie) jest w głównym pliku [README.md](../README.md), a historia wersji w [CHANGELOG.md](../CHANGELOG.md).
 
-- `config.png` — module configuration page (Auto-format toggle + Manage
-  snippets button + APLINE attribution)
-- `list.png` — snippet management list (drag & drop, type badges,
-  code preview)
-- `form.png` — snippet edit form (type toggle, Format CSS button,
-  Previous versions panel)
+## Zrzuty ekranu
 
-Capture on a clean PrestaShop 9.0.x staging install after enabling the
-module.
+Ten katalog jest miejscem na zrzuty ekranu do README. Aktualnie ich nie ma. Zrób je na czystej instalacji PrestaShop 9 z danymi testowymi (nigdy z prawdziwego sklepu):
+
+- `config.png` — strona konfiguracji (przełącznik formatowania CSS, przycisk „Zarządzaj fragmentami CSS/JS”);
+- `list.png` — lista fragmentów (przeciąganie kolejności, znaczniki typu, podgląd kodu);
+- `form.png` — formularz fragmentu (wybór typu, przycisk „Formatuj CSS”, panel „Poprzednie wersje”).
