@@ -2,6 +2,13 @@
 
 Wszystkie istotne zmiany w module **APLINE Simple Edit CSS/JS dla PrestaShop 9** są zapisywane w tym pliku. Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/), wersjonowanie zgodne z [Semantic Versioning](https://semver.org/lang/pl/).
 
+## [1.1.1] – 2026-10-08
+
+### Zmieniono
+- Licencja **MIT** (wcześniej Custom Attribution License v1.0): moduł możesz używać, zmieniać i rozpowszechniać, także komercyjnie, z zachowaniem noty o prawach autorskich i licencji.
+- Autor: Arkadiusz Pielechowski — podpis „Moduł stworzony przez PIELECHOWSKI.PL” na stronie konfiguracji i ramka „Podoba Ci się ten moduł?” prowadzą do https://pielechowski.pl.
+- Lżejsze logo modułu (23 KB zamiast ok. 0,8–0,9 MB) — szybsza lista modułów w panelu.
+
 ## [1.1.0] – 2026-10-08
 
 Spolszczenie interfejsu i duże przyciski głównych akcji. Aktualizacja z 1.0.0 zachowuje wszystkie fragmenty, ich historię wersji i ustawienia modułu.

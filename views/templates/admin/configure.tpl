@@ -1,6 +1,6 @@
 {*
  * APLINE Simple Edit CSS/JS module for PrestaShop 9.
- * @author APLINE Arkadiusz Pielechowski
+ * @author Arkadiusz Pielechowski
  *}
 <div class="panel">
   <h3><i class="icon-code"></i> {l s='Fragmenty CSS/JS' d='Modules.Aplinesimpleeditcssjs.Admin'}</h3>

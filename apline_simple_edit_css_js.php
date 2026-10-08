@@ -10,9 +10,9 @@
  * is intentional — the input comes from a back-office admin with full rights,
  * never from a customer. It is not XSS: customers cannot create snippets.
  *
- * @author    APLINE Arkadiusz Pielechowski
- * @copyright APLINE Arkadiusz Pielechowski
- * @license   Custom Attribution License v1.0 - see LICENSE.md
+ * @author    Arkadiusz Pielechowski
+ * @copyright Arkadiusz Pielechowski
+ * @license   MIT - see LICENSE.md
  */
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -45,8 +45,8 @@ class apline_simple_edit_css_js extends Module
     {
         $this->name = 'apline_simple_edit_css_js';
         $this->tab = 'front_office_features';
-        $this->version = '1.1.0';
-        $this->author = 'APLINE Arkadiusz Pielechowski';
+        $this->version = '1.1.1';
+        $this->author = 'Arkadiusz Pielechowski';
         $this->need_instance = false;
         $this->bootstrap = true;
 
@@ -451,10 +451,9 @@ JS_SEED;
     }
 
     /**
-     * APLINE attribution block. Required by the module license to stay visible
-     * on the configuration page with a working link to https://apline.pl.
-     * Rendered server-side as a standalone component (not CSS-only) so it
-     * cannot be trivially stripped.
+     * Author credit with a link to https://pielechowski.pl, shown on the
+     * configuration page. The module is MIT-licensed: the credit is kept by
+     * default, it is not a license requirement.
      *
      * @return string
      */
@@ -467,7 +466,7 @@ JS_SEED;
         </style>
         <div class="apline-credit">
             ' . $this->trans('Moduł stworzony przez', [], 'Modules.Aplinesimpleeditcssjs.Admin') . '
-            <a href="https://apline.pl" target="_blank" rel="noopener noreferrer">APLINE</a>
+            <a href="https://pielechowski.pl" target="_blank" rel="noopener noreferrer">PIELECHOWSKI.PL</a>
         </div>';
     }
 
@@ -482,7 +481,7 @@ JS_SEED;
         <div class="panel">
             <h3>&#9749; ' . $this->trans('Podoba Ci się ten moduł?', [], 'Modules.Aplinesimpleeditcssjs.Admin') . '</h3>
             <p>' . $this->trans('Potrzebujesz rozwiązań dla PrestaShop na zamówienie, optymalizacji wydajności lub integracji?', [], 'Modules.Aplinesimpleeditcssjs.Admin') . '</p>
-            <a class="btn btn-default" href="https://apline.pl" target="_blank" rel="noopener noreferrer">&#8594; APLINE.PL</a>
+            <a class="btn btn-default" href="https://pielechowski.pl" target="_blank" rel="noopener noreferrer">&#8594; PIELECHOWSKI.PL</a>
         </div>';
     }
 

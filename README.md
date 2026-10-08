@@ -1,6 +1,6 @@
 # APLINE Simple Edit CSS/JS — własny CSS i JavaScript w sklepie PrestaShop 9
 
-![PrestaShop 9](https://img.shields.io/badge/PrestaShop-9.x-DF0067) ![PHP 8.1+](https://img.shields.io/badge/PHP-8.1%2B-777BB4) ![Wersja](https://img.shields.io/badge/wersja-1.1.0-2ea44f) ![Licencja](https://img.shields.io/badge/licencja-Custom%20Attribution%20v1.0-blue)
+![PrestaShop 9](https://img.shields.io/badge/PrestaShop-9.x-DF0067) ![PHP 8.1+](https://img.shields.io/badge/PHP-8.1%2B-777BB4) ![Wersja](https://img.shields.io/badge/wersja-1.1.1-2ea44f) ![Licencja](https://img.shields.io/badge/licencja-MIT-blue)
 
 Moduł pozwala wstawiać na stronę sklepu własne fragmenty CSS i JavaScript bez edytowania motywu i bez grzebania w plikach. Każdy fragment to osobny wiersz w panelu: kolejność zmieniasz przeciąganiem, fragment włączasz i wyłączasz jednym kliknięciem, a kod edytujesz w formularzu, z historią ostatnich wersji i formatowaniem CSS. Dla właścicieli sklepów i wdrożeniowców, którzy chcą szybko poprawić wygląd albo dodać skrypt i nie stracić tych zmian przy aktualizacji motywu.
 
@@ -90,6 +90,6 @@ Historia wersji: [CHANGELOG.md](CHANGELOG.md).
 
 ## Licencja i autor
 
-Custom Attribution License v1.0 — pełny tekst w [LICENSE.md](LICENSE.md). Moduł możesz używać komercyjnie, modyfikować, rozpowszechniać i dołączać do projektów klientów. Nie wolno usuwać ani ukrywać informacji o autorze (APLINE) ze strony konfiguracji modułu: ma być widoczna, prowadzić do <https://apline.pl> i mieć czytelną czcionkę (co najmniej 12 px).
+MIT — pełny tekst w [LICENSE.md](LICENSE.md). Moduł możesz używać, zmieniać i rozpowszechniać, także komercyjnie; zachowaj tylko informację o prawach autorskich i licencji.
 
-APLINE Arkadiusz Pielechowski · [apline.pl](https://apline.pl)
+Arkadiusz Pielechowski · [pielechowski.pl](https://pielechowski.pl)
